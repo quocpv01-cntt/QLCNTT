@@ -301,11 +301,11 @@ const LicenseForm: React.FC<{ currentItem: Partial<License> | null; onSave: (ite
                 <div className="md:col-span-2">
                     <label className={labelClass}>Trạng thái</label>
                     <select name="status" value={formState.status || ''} onChange={handleChange} className={inputClass} required>
-                        <option value="" disabled>-- Chọn trạng thái --</option>
+                        <option value="">-- Chọn trạng thái --</option>
                         {Object.values(LicenseStatus).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                 </div>
-             </div>
+            </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <Button type="button" variant="secondary" onClick={onClose}>Hủy</Button>
                 <Button type="submit">Lưu</Button>

@@ -20,18 +20,38 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Define keys for localStorage
+const USER_THEME_KEY = 'theme';
+const USER_COLOR_KEY = 'primaryColor';
+const SYSTEM_DEFAULT_THEME_KEY = 'systemDefaultTheme_v1';
+const SYSTEM_DEFAULT_COLOR_KEY = 'systemDefaultColor_v1';
+
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      return (localStorage.getItem('theme') as Theme) || 'dark';
+      // 1. Check for user-specific setting
+      const userTheme = localStorage.getItem(USER_THEME_KEY) as Theme;
+      if (userTheme && (userTheme === 'light' || userTheme === 'dark')) return userTheme;
+
+      // 2. Check for system-wide default
+      const systemTheme = localStorage.getItem(SYSTEM_DEFAULT_THEME_KEY) as Theme;
+      if (systemTheme && (systemTheme === 'light' || systemTheme === 'dark')) return systemTheme;
     }
+    // 3. Fallback to hardcoded default
     return 'dark';
   });
 
   const [primaryColor, setPrimaryColorState] = useState<PrimaryColor>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      return (localStorage.getItem('primaryColor') as PrimaryColor) || 'blue';
+      // 1. Check for user-specific setting
+      const userColor = localStorage.getItem(USER_COLOR_KEY) as PrimaryColor;
+      if (userColor && colorPalettes[userColor]) return userColor;
+      
+      // 2. Check for system-wide default
+      const systemColor = localStorage.getItem(SYSTEM_DEFAULT_COLOR_KEY) as PrimaryColor;
+      if (systemColor && colorPalettes[systemColor]) return systemColor;
     }
+    // 3. Fallback to hardcoded default
     return 'blue';
   });
 
@@ -39,7 +59,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    // Any change to theme by a user is saved as their personal preference
+    localStorage.setItem(USER_THEME_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
@@ -48,7 +69,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     for (const [shade, value] of Object.entries(palette)) {
         root.style.setProperty(`--color-primary-${shade}`, String(value));
     }
-    localStorage.setItem('primaryColor', primaryColor);
+    // Any change to color by a user is saved as their personal preference
+    localStorage.setItem(USER_COLOR_KEY, primaryColor);
   }, [primaryColor]);
 
 
